@@ -21,10 +21,10 @@ Once you create an AzureML Web Service, to keep it always ready for low latency 
 * Go to that web site, and click WEBJOBS tab
 * Create a new web job, in US South Central
 * Use the zip file created above to supply the payload for the job
-* Configure the job to run on *SCHEDULE*, every 6 hrs
+* Configure the job to run on SCHEDULE, every 6 hrs
 	
   
-
-* This is not an official tool from AzureML, no guarantees are given with it
-* Note that the tool makes service calls which may incur AzureML charges. 
+----------------------
+* *This is not an official tool from AzureML, no guarantees are given with it*
+* *The tool makes service calls which may incur AzureML charges.* 
    
