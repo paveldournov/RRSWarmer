@@ -1,0 +1,23 @@
+{
+  "Inputs": {
+    "input1": {
+      "ColumnNames": [
+        "Col1"
+      ],
+      "Values": [
+        [
+          "Earlier this week, word started spreading that Lenovo had been pre-installing a sketchy adware program called “SuperFish” onto many of its Windows PCs for months.
+
+Then researchers started finding nasty vulnerabilities — namely, that SuperFish was using some pretty ugly hacks to tinker with your computer’s encryption certificates, and doing so in a way that seemingly leaves your otherwise “encrypted” communications (everything that goes over HTTPS) unsecure whenever you’re on a shared WiFi connection (like at a coffee shop)
+
+By this morning, the US Department of Homeland Security was urging Lenovo laptop owners to remove the tool.
+
+Even without the security implications, SuperFish was pretty sketchy. Its purpose? Catch Google search results before they hit your screen, then quietly modify them to include more ads.
+
+Lenovo is now rushing to put out the fires; they disclosed yesterday that they’d turned off everything SuperFish-related on the server side back in January — which, while a good step, doesn’t fix the problem of the ugly security flaws lurking in the laptops."
+        ]
+      ]
+    }
+  },
+  "GlobalParameters": {}
+}
