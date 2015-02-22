@@ -26,5 +26,6 @@ Once you create an AzureML Web Service, to keep it always ready for low latency 
   
 8) You are done
 
+*This is not an official tool, no guarantees are given with it
 *Note that the tool makes service calls which may incur AzureML charges. Every run makes 240 calls, ~1000 calls/day = $0.5, or $15/month
    
