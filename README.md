@@ -8,6 +8,7 @@ Once you create an AzureML Web Service, to keep it always ready for low latency 
 2) This will produce AniStresser.exe 
 
 3) Create a command file run.cmd with this content, replace {placeholders} with your id's and keys
+
 	AniStresser.exe ussouthcentral.services.azureml.net workspaces/{your workspace}/services/{your service id}/execute?api-version=2.0 {service key} output.txt input.json 40:40:5
 	
 4) Create input.json file with a sample payload for your service
