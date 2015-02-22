@@ -1,6 +1,0 @@
-d:\work\AniStresser\AniStresser\bin\Debug\AniStresser.exe.config
-d:\work\AniStresser\AniStresser\bin\Debug\AniStresser.exe
-d:\work\AniStresser\AniStresser\bin\Debug\AniStresser.pdb
-d:\work\AniStresser\AniStresser\obj\Debug\AniStresser.exe
-d:\work\AniStresser\AniStresser\obj\Debug\AniStresser.pdb
-D:\work\AniStresser\AniStresser\obj\Debug\AniStresser.csprojResolveAssemblyReference.cache
