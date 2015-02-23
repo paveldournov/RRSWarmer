@@ -17,7 +17,7 @@ Once you create an AzureML Web Service, to keep it always ready for low latency 
 
 6) Create a zip file with AniStresser.exe, run.cmd, and all other files needed to run the tool
 
-7) Go to manage.windowsazure.com -> WEBSITES -> [creat a new web site]
+7) Go to manage.windowsazure.com -> WEBSITES -> [create a new web site, *it is only needed for the web job, you don't actually need to create an actual site*]
 * Go to that web site, and click WEBJOBS tab
 * Create a new web job, in US South Central
 * Use the zip file created above to supply the payload for the job
