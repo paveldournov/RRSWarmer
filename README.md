@@ -9,7 +9,7 @@ Once you create an AzureML Web Service, to keep it always ready for low latency 
 
 3) Create a file named `run.cmd` with this content, replace {placeholders} with your id's and keys
 
-	AniStresser.exe warm {your workspace} {workspace access token} {your service id} {endpoint name input.json output.txt
+	AniStresser.exe warm {your workspace} {workspace access token} {your service id} {endpoint name} input.json output.txt
 	
 4) Create input.json file with a sample payload for your service
 
