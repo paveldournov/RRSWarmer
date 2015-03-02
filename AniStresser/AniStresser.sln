@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.22310.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AniStresser", "AniStresser.csproj", "{4A74463F-1B62-46BD-ABC5-C7F369F5AB7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMLClientSDK", "..\AzureMLClientSDK\AzureMLClientSDK.csproj", "{CCD3CAEC-88C9-481A-892D-7F1DC0B6D16D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A74463F-1B62-46BD-ABC5-C7F369F5AB7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A74463F-1B62-46BD-ABC5-C7F369F5AB7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A74463F-1B62-46BD-ABC5-C7F369F5AB7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A74463F-1B62-46BD-ABC5-C7F369F5AB7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCD3CAEC-88C9-481A-892D-7F1DC0B6D16D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCD3CAEC-88C9-481A-892D-7F1DC0B6D16D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCD3CAEC-88C9-481A-892D-7F1DC0B6D16D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCD3CAEC-88C9-481A-892D-7F1DC0B6D16D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

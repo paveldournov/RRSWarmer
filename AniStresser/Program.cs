@@ -9,127 +9,76 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AzureMLClientSDK;
 
 namespace AniStresser
 {
     class Program
     {
-        private static string hostName;
-
         private static string requestUrl;
 
-        private static string appKey;
-
-        private static string protocol = "https";
-
         private static StreamWriter outWriter = null;
-
         private static HttpClient workerClient;
-
         private static int errorsCount = 0;
-
         private static string requestContent;
 
         static void Main(string[] args)
         {
-            if (args.Length != 6)
+            if (args.Length != 7)
             {
-                Console.WriteLine("Usage: AntiStresser [host name] [url] [app key] [output file] [input file] [concurrency start:end:repeats]");
+                Console.WriteLine("Usage: AntiStresser [command] [workspace] [workspace token] [web service id] [endpoint] [input file] [output file]");
+                Console.WriteLine("Commands: warm");
                 return;
             }
 
-            int w1, w2;
-            ThreadPool.GetMinThreads(out w1, out w2);
-            Console.WriteLine(w1);
-            Console.WriteLine(w2);
-
-            ThreadPool.GetMaxThreads(out w1, out w2);
-            Console.WriteLine(w1);
-            Console.WriteLine(w2);
-
             ThreadPool.SetMinThreads(12, 12);
-
-            ThreadPool.GetMinThreads(out w1, out w2);
-            Console.WriteLine(w1);
-            Console.WriteLine(w2);
-
             ServicePointManager.DefaultConnectionLimit = 1000;
 
             workerClient = new HttpClient();
-
             workerClient.DefaultRequestHeaders.Accept.Clear();
             workerClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            // ignore SSL errors
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            string command = args[0].ToLower();
+            string workspaceId = args[1];
+            string workspaceToken = args[2];
+            string webServiceId = args[3];
+            string endpointName = args[4];
+            string inputFileName = args[5];
+            string outputFileName = args[6];
 
-            if (args.Length > 0)
+            if (command == "warm")
             {
-                hostName = args[0];
+                Console.WriteLine("Warming up service");
+            }
+            else
+            {
+                Console.WriteLine("Unknown command");
+                return;
             }
 
-            if (args.Length > 1)
+            var webServiceEndpointDetails = DiscoverWebServiceEndpoint(workspaceId, workspaceToken, webServiceId, endpointName);
+            requestUrl = webServiceEndpointDetails.ApiLocation + "/execute?api-version=2.0";
+            workerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", webServiceEndpointDetails.PrimaryKey);
+
+            string outFileName = outputFileName;
+
+            if (File.Exists(outFileName))
             {
-                requestUrl = args[1];
+                File.Delete(outFileName);
             }
+            outWriter = File.CreateText(outFileName);
 
-            if (args.Length > 2)
-            {
-                appKey = args[2];
-            }
+            string inFileName = inputFileName;
+            requestContent = File.ReadAllText(inFileName);
+            Console.WriteLine("Using request:\n{0}\n", requestContent);
 
-            string outFileName = string.Empty;
-
-            if (args.Length > 3)
-            {
-                outFileName = args[3];
-
-                if (File.Exists(outFileName))
-                {
-                    File.Delete(outFileName);
-                }
-
-                outWriter = File.CreateText(outFileName);
-            }
-
-            if (args.Length > 4)
-            {
-                string inFileName = args[4];
-
-                requestContent = File.ReadAllText(inFileName);
-
-                Console.WriteLine("Using request:\n{0}\n", requestContent);
-            }
-
-            int concurrentStart = 1;
-            int concurrentEnd = 8;
-            int repeats = 100;
-
-            if (args.Length > 5)
-            {
-                string testMetrics = args[5];
-
-                // format: start:end:count
-                string[] m = testMetrics.Split(':');
-                if (m.Length != 3)
-                {
-                    Console.WriteLine("Metrics format- start:end:count");
-                    return;
-                }
-
-                concurrentStart = int.Parse(m[0]);
-                concurrentEnd = int.Parse(m[1]);
-                repeats = int.Parse(m[2]);
-            }
-
-            if (!string.IsNullOrWhiteSpace(appKey))
-            {
-                workerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appKey);
-            }
+            int concurrentStart = webServiceEndpointDetails.MaxConcurrentCalls * 2;
+            int concurrentEnd = webServiceEndpointDetails.MaxConcurrentCalls * 2;
+            int repeats = 4;
 
             Console.WriteLine("AZURE ML RRS API WARMER");
             Console.WriteLine("STARTING:");
-            Console.WriteLine("Using {0}://{1}/{2}", protocol, hostName, requestUrl);
+            Console.WriteLine("Using {0}", requestUrl);
             Console.WriteLine("Output to {0}", outFileName);
             Console.WriteLine("Start from {0} concurrent requests, to {1}, repeat {2} times.", concurrentStart, concurrentEnd, repeats);
             Console.WriteLine("---------------------------------------------------------------");
@@ -227,45 +176,42 @@ namespace AniStresser
 
         public async Task<long> RRSTest(string reqId)
         {
+            var postBody = new StringContent(
+                Program.requestContent.Replace("[ID]", reqId),
+                Encoding.UTF8,
+                "application/json");
+
+            Guid req = Guid.NewGuid();
+            postBody.Headers.TryAddWithoutValidation("x-ms-request-id", req.ToString());
+
+            Uri postUri = new Uri(requestUrl);
+
+            Stopwatch sw = Stopwatch.StartNew();
+            HttpResponseMessage response = await workerClient.PostAsync(postUri, postBody);
+            string returnString = await response.Content.ReadAsStringAsync();
+            sw.Stop();
+
+            IEnumerable<string> reqs;
+            string rrsId = null;
+            if (response.Headers.TryGetValues("x-ms-request-id", out reqs))
             {
-                var postBody = new StringContent(
-                    Program.requestContent.Replace("[ID]", reqId),
-                    Encoding.UTF8,
-                    "application/json");
-
-                Guid req = Guid.NewGuid();
-                postBody.Headers.TryAddWithoutValidation("x-ms-request-id", req.ToString());
-
-                Uri postUri = new Uri(string.Format("{0}://{1}/{2}", protocol, hostName, requestUrl));
-
-                Stopwatch sw = Stopwatch.StartNew();
-                HttpResponseMessage response = await workerClient.PostAsync(postUri, postBody);
-                string returnString = await response.Content.ReadAsStringAsync();
-                sw.Stop();
-
-                IEnumerable<string> reqs;
-                string rrsId = null;
-                if (response.Headers.TryGetValues("x-ms-request-id", out reqs))
-                {
-                    rrsId = reqs.FirstOrDefault();
-                }
-
-                Console.WriteLine("{0}->{1} {2}", req, rrsId, sw.ElapsedMilliseconds);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine("Error {0}, {1}.", response.StatusCode, returnString);
-                    Console.WriteLine(returnString);
-                    errorsCount++;
-                    return 0;
-                }
-
-                response.Dispose();
-                postBody.Dispose();
-
-
-                return sw.ElapsedMilliseconds;
+                rrsId = reqs.FirstOrDefault();
             }
+
+            Console.WriteLine("{0}->{1} {2}", req, rrsId, sw.ElapsedMilliseconds);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Error {0}, {1}.", response.StatusCode, returnString);
+                Console.WriteLine(returnString);
+                errorsCount++;
+                return 0;
+            }
+
+            response.Dispose();
+            postBody.Dispose();
+
+            return sw.ElapsedMilliseconds;
         }
 
         static void Log(string msg)
@@ -274,6 +220,30 @@ namespace AniStresser
             {
                 outWriter.WriteLine(msg);
             }
+        }
+
+        static WebServiceEndpoint DiscoverWebServiceEndpoint(string workspaceId, string workspaceToken, string webServiceId, string endpointName)
+        {
+            MLAccessContext ctx = new MLAccessContext(workspaceId, workspaceToken);
+            ServiceManagerCaller caller = new ServiceManagerCaller(ctx);
+
+            Task<WebServiceEndpoint[]> endpointsTask = caller.GetWebServiceEndpoints(webServiceId);
+            endpointsTask.Wait(15 * 1000);
+            WebServiceEndpoint[] endpoints = endpointsTask.Result;
+
+            if (endpoints == null || endpoints.Length < 1)
+            {
+                throw new ArgumentException(string.Format("No endpoints found in web service {0}", webServiceId));
+            }
+
+            var ep = endpoints.SingleOrDefault(e => e.Name.Equals(endpointName, StringComparison.OrdinalIgnoreCase));
+
+            if (ep == null)
+            {
+                throw new ArgumentException(string.Format("No endpoint with name {0}", endpointName));
+            }
+
+            return ep;
         }
     }
 }
