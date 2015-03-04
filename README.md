@@ -3,7 +3,7 @@ Automatic service warm up for AzureML Web Service API
 
 Once you create an AzureML Web Service, to keep it always ready for low latency responses follow this instruction:
 
-1) Download and compile the code in this repository
+1) Download and compile the code from this repository. You can just download the `RRSWarmer/AniStresser/bin` directory with the tool binaries
 
 2) This will produce `AniStresser.exe` 
 
