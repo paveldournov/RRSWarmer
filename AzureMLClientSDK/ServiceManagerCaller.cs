@@ -8,26 +8,56 @@ namespace AzureMLClientSDK
 {
     public class ServiceManagerCaller
     {
-        private const string BaseUrlTemplate = "https://management.azureml.net/workspaces/{0}/";
+        // AzureML management URL's in 3 regions:
+        private static string[] managementUrls = new string[] 
+        {
+            "management.azureml.net",
+            "asiasoutheast.management.azureml.net",
+            "europewest.management.azureml.net"
+        };
+
+        private const string BaseUrlTemplate = "https://{0}/workspaces/{1}/";
 
         private readonly MLAccessContext accessContext;
-        private readonly string baseUrl;
 
         public ServiceManagerCaller(MLAccessContext accessContext)
         {
             this.accessContext = accessContext;
-            this.baseUrl = string.Format(BaseUrlTemplate, accessContext.WorkspaceId);
         }
 
         public async Task<WebServiceEndpoint[]> GetWebServiceEndpoints(string webServiceGroupId)
         {
-            string url = this.baseUrl + string.Format("webservices/{0}/endpoints", webServiceGroupId);
+            Exception lastException = null;
 
-            string endpointsJson = await this.CallAzureMLSM(HttpMethod.Get, url, null);
+            // need to find the region where the web service is running, iterate over management URL's
+            foreach (string managementUrl in managementUrls)
+            {
+                string baseUrl = string.Format(BaseUrlTemplate, managementUrl, accessContext.WorkspaceId);
+                string url = baseUrl + string.Format("webservices/{0}/endpoints", webServiceGroupId);
+                Console.WriteLine("Looking for the web service in {0}", url);
 
-            WebServiceEndpoint[] we = JsonConvert.DeserializeObject<WebServiceEndpoint[]>(endpointsJson);
+                try
+                {
+                    string endpointsJson = await this.CallAzureMLSM(HttpMethod.Get, url, null);
+                    WebServiceEndpoint[] we = JsonConvert.DeserializeObject<WebServiceEndpoint[]>(endpointsJson);
+                    Console.WriteLine("Web service endpoint found {0}", endpointsJson);
+                    return we;
+                }
+                catch(Exception ex)
+                {
+                    if (ex.Message.Contains("WorkspaceNotFound"))
+                    {
+                        // workspace may be in another region
+                        lastException = ex;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
 
-            return we;
+            throw lastException;
         }
 
         private async Task<string> CallAzureMLSM(HttpMethod method, string url, string payload)

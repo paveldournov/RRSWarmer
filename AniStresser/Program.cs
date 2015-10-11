@@ -57,6 +57,8 @@ namespace AniStresser
             }
 
             var webServiceEndpointDetails = DiscoverWebServiceEndpoint(workspaceId, workspaceToken, webServiceId, endpointName);
+
+
             requestUrl = webServiceEndpointDetails.ApiLocation + "/execute?api-version=2.0";
             workerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", webServiceEndpointDetails.PrimaryKey);
 
@@ -234,6 +236,12 @@ namespace AniStresser
             if (endpoints == null || endpoints.Length < 1)
             {
                 throw new ArgumentException(string.Format("No endpoints found in web service {0}", webServiceId));
+            }
+
+            Console.WriteLine("Web service endpoints:");
+            foreach(var endp in endpoints)
+            {
+                Console.WriteLine(endp.Name);
             }
 
             var ep = endpoints.SingleOrDefault(e => e.Name.Equals(endpointName, StringComparison.OrdinalIgnoreCase));
