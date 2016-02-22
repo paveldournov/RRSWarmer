@@ -1,4 +1,11 @@
 # RRSWarmer
+
+AzureML Web Services had a major new feature released, which makes this tool unnecessary. Now AzureML automatically scales your RRS web service to the level of actual load, minimizing the latency variability of the service responses.
+
+The tool is kept here for references as a stress load generation tool.
+
+========================================
+
 Automatic service warm up for AzureML Web Service API 
 
 Once you create an AzureML Web Service, to keep it always ready for low latency responses follow this instruction:
